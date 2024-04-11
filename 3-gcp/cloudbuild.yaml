@@ -1,0 +1,18 @@
+steps:
+    - name: gcr.io/cloud-builders/gcloud
+      entrypoint: 'bash'
+      args: [ '-c', "gcloud secrets versions access latest --secret=cf-validate-proformas --project=$_PROJECT_ID --format='get(payload.data)' | tr '_-' '/+' | base64 -d > /workspace/.env.yaml" ]
+    - name: 'gcr.io/cloud-builders/gcloud'
+      args:
+      - beta
+      - functions
+      - deploy
+      - proforma_validate
+      - --runtime=python312
+      - --source=.
+      - --project=$_PROJECT_ID
+      - --entry-point=init
+      - --trigger-event-filters="type=providers/cloud.storage/eventTypes/object.google.cloud.storage.object.v1.finalized"
+      - --trigger-event-filters="bucket=$_PROJECT_ID-proformas"
+      - --env-vars-file=.env.yaml
+      - --region=us-central1

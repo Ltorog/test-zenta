@@ -1,0 +1,56 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:16-alpine
+    build:
+      context: ./database
+      dockerfile: Dockerfile
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    container_name: postgres
+    volumes:
+      - ./database/pgdata:/var/lib/postgresql/data
+    ports:
+      - '${POSTGRES_PORT}:5432'
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: nest-pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=pgadmin4
+    ports:
+      - '4000:80'
+    depends_on:
+      - db
+
+  back-app:
+    build:
+      context: ./back-app
+      dockerfile: Dockerfile
+    container_name: back-app
+    env_file: .env
+    ports:
+      - '${DOCKER_BACK_PORT}:3000'
+    depends_on:
+      - db
+    volumes:
+      - ./back-app:/app/src
+
+  front-app:
+    build:
+      context: ./front-app
+      dockerfile: Dockerfile
+    container_name: front-app
+    env_file: .env
+    ports:
+      - '${DOCKER_FRONT_PORT}:3001'
+    depends_on:
+      - db
+      - back-app
+    volumes:
+      - ./front-app/src:/app/src
+
+  

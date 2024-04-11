@@ -1,0 +1,39 @@
+image: python:3.9
+
+definitions:
+  steps:
+    - step: &scan-stage-and-deploy
+        name: Run tests
+        script:
+          - pip install -r requirements.txt
+          - pip install -r requirements_dev.txt
+          - python -m pytest --cov-report xml:./tests/coverage.xml --cov=. tests -s -vv
+          - pipe: sonarsource/sonarqube-scan:1.0.0
+            variables:
+              SONAR_HOST_URL: ${SONAR_HOST_URL} # Get the value from the repository/workspace variable.
+              SONAR_TOKEN: ${SONAR_TOKEN} # Get the value from the repository/workspace variable. You shouldn't set secret in clear text here.
+    - step: &config-environment
+        name: Config environment
+        script:
+          - echo $PYTHONPATH
+          - set $PYTHONPATH=.
+          - echo $PYTHONPATH
+          - echo $BITBUCKET_CLONE_DIR
+    - step: &build-step
+        name: SonarQube analysis
+        script:
+          - pipe: sonarsource/sonarqube-scan:1.0.0
+            variables:
+              SONAR_HOST_URL: ${SONAR_HOST_URL} # Get the value from the repository/workspace variable.
+              SONAR_TOKEN: ${SONAR_TOKEN} # Get the value from the repository/workspace variable. You shouldn't set secret in clear text here.
+  caches:
+    sonar: ~/.sonar
+
+clone:
+  depth: full
+
+pipelines:
+  branches:
+    '{stage}':
+      - step: *config-environment
+      - step: *scan-stage-and-deploy
