@@ -11,7 +11,6 @@ export class SubBreed {
     @Column('text')
     description: string;
 
-
     @ManyToOne(
         () => Breed, 
         (breed) => breed.sub_breeds, 
@@ -26,12 +25,11 @@ export class SubBreed {
 
     @OneToMany(
         () => Dog, 
-        (dog) => dog.sub_breed,
+        (dog) => dog.sub_breed, // Define the property in Dog entity to join with
         { 
             onDelete: 'CASCADE', 
             onUpdate: 'CASCADE', 
             nullable: false 
         })
-    @JoinColumn({ name: 'id', referencedColumnName: 'id_sub_breed'})
-    dogs: Dog[];
+    dogs: Dog[]; // Define the property to hold related dogs
 }

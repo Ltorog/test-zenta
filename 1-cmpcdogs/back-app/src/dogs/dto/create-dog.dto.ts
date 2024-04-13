@@ -1,7 +1,4 @@
 import { IsDefined, IsInt, IsPositive, IsString, MinLength } from "class-validator";
-import { SubBreed } from "src/breeds/entities/sub_breed.entity";
-import { AfterInsert, Relation } from "typeorm";
-
 
 export class CreateDogDto {
 
@@ -13,6 +10,6 @@ export class CreateDogDto {
     @IsInt()
     @IsPositive()
     @IsDefined()
-    id_sub_breed: number;
+    id_sub_breed: number; // Change the type to number to hold the foreign key value
 
 }

@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException, Query } from '@nestjs/common';
 import { CreateDogDto } from './dto/create-dog.dto';
 import { UpdateDogDto } from './dto/update-dog.dto';
@@ -19,8 +19,6 @@ export class DogsService {
     private readonly dogsRepository: Repository<Dog>,
     @InjectRepository(SubBreed)
     private readonly subBreedRepository: Repository<SubBreed>
-    
-  
   ){}
 
   async create(createDogDto: CreateDogDto) {
@@ -34,6 +32,7 @@ export class DogsService {
     }
 
     const dog = this.dogsRepository.create(createDogDto);
+    dog.sub_breed = subBreed;
     console.log({ dog });
     //
     await this.dogsRepository.save(dog);
@@ -44,34 +43,51 @@ export class DogsService {
 
   async findAll(@Query() paginationDto: PaginationDto) {
 
-    const { limit = 10, offset = 0 } = paginationDto;
+    const { limit = 10, page = 1, search = null, id_sub_breed = null, id_breed = null } = paginationDto;
 
-    console.log({paginationDto});
+    const offset = limit*(page-1);
 
-    const dogs = await this.dogsRepository.find(
-      {
-        relations: ["id_sub_breed"]
+    const dogs = await this.dogsRepository.find({
+      take: limit,
+      skip: offset,
+      relations: ['sub_breed', 'sub_breed.breed'],
+      where: {
+        description: ILike(`%${search || ''}%`),
+        sub_breed: {
+          id: id_sub_breed,
+          breed: {
+            id: id_breed
+          }
+        }
       }
-    );
+    });
 
-    return dogs
+    const dogsTotal = await this.dogsRepository.count({
+      relations: ['sub_breed', 'sub_breed.breed'],
+      where: {
+        description: ILike(`%${search || ''}%`),
+        sub_breed: {
+          id: id_sub_breed,
+          breed: {
+            id: id_breed
+          }
+        }
+      }
+    });
+
+    const total_page = Math.ceil(dogsTotal / limit); 
+    const pagination = {
+      total: dogsTotal,
+      page: page,
+      total_pages: total_page
+    } 
+
+    return {dogs, pagination}
   }
 
   async findOne(id: number) {
-    const dog = this.dogsRepository.findBy({
-        id,
-        join: {
-            alias: "sub_breed",
-            innerJoinAndSelect: {
-                "description": "sub_breed.description"
-            }
-        }
-    });
+    const dog = this.dogsRepository.findBy({id});
     return dog
-  }
-
-  update(id: number, updateDogDto: UpdateDogDto) {
-    return {'message': `This action updates a #${id} dog`};
   }
 
   async remove(id: number) {
@@ -89,16 +105,5 @@ export class DogsService {
       this.logger.error(error)
       throw new InternalServerErrorException('Error delete dog')
     }
-  }
-
-
-  private handleDBExceptions( error: any ) {
-    if (error.code === '23505' ) {
-      throw new BadRequestException(error.detail);
-    }
-
-    this.logger.error(error)
-
-    throw new InternalServerErrorException('Unexpected error, check server logs');
   }
 }

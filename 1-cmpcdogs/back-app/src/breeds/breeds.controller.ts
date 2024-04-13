@@ -1,34 +1,20 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { BreedsService } from './breeds.service';
-import { CreateBreedDto } from './dto/create-breed.dto';
-import { UpdateBreedDto } from './dto/update-breed.dto';
+import { PaginationDto } from 'src/common/dtos/pagination.dto';
+import { SubBreedDto } from 'src/common/dtos/sub_breeds.dto';
 
-@Controller('breeds')
+@Controller('')
 export class BreedsController {
   constructor(private readonly breedsService: BreedsService) {}
 
-  @Post()
-  create(@Body() createBreedDto: CreateBreedDto) {
-    return this.breedsService.create(createBreedDto);
+  @Get('breeds')
+  findAllBreeds(@Query() paginationDto: PaginationDto) {
+    return this.breedsService.findAllBreeds(paginationDto);
   }
 
-  @Get()
-  findAll() {
-    return this.breedsService.findAll();
+  @Get('sub-breeds')
+  findAllSubBreeds(@Query() subBreedDto: SubBreedDto) {
+    return this.breedsService.findAllSubBreeds(subBreedDto);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.breedsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBreedDto: UpdateBreedDto) {
-    return this.breedsService.update(+id, updateBreedDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.breedsService.remove(+id);
-  }
 }

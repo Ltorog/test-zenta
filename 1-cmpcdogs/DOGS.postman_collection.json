@@ -1,0 +1,136 @@
+{
+	"info": {
+		"_postman_id": "06eb1194-4f77-472f-a256-9ed253d1d975",
+		"name": "DOGS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "12942647",
+		"_collection_link": "https://martian-crater-648191-1.postman.co/workspace/New-Team-Workspace~e764fa4f-7f26-4295-bebd-674c9477b86e/collection/12942647-06eb1194-4f77-472f-a256-9ed253d1d975?action=share&source=collection_link&creator=12942647"
+	},
+	"item": [
+		{
+			"name": "Get Dog Id",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "localhost:3000/api/dogs/3"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Dogs",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/api/dogs?limit=10&offset=0",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"dogs"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "10"
+						},
+						{
+							"key": "offset",
+							"value": "0"
+						},
+						{
+							"key": "search",
+							"value": "pa",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Dog",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"description\": \"cachupin\",\r\n    \"id_sub_breed\": 2\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "localhost:3000/api/dogs"
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Dog",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": "localhost:3000/api/dogs/22"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Breeds",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/api/breeds",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"breeds"
+					],
+					"query": [
+						{
+							"key": "search",
+							"value": "pitbull",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Sub Breeds",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/api/sub-breeds?search=&id_breed=1",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"sub-breeds"
+					],
+					"query": [
+						{
+							"key": "search",
+							"value": ""
+						},
+						{
+							"key": "id_breed",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
