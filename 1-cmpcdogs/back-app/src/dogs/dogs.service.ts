@@ -22,8 +22,6 @@ export class DogsService {
   ){}
 
   async create(createDogDto: CreateDogDto) {
-    console.log("DOG DTO", { createDogDto })
-    
     const subBreed = await this.subBreedRepository.findOneBy({ id: createDogDto.id_sub_breed })
 
     console.log({ subBreed })

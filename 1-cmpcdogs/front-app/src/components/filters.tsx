@@ -6,7 +6,7 @@ export const SelectBreed = () => {
     const BREEDS = [{id: 1, description: "Pastor"}, {id: 2, description: "Pitbull"}];
 
     return (
-    <Col xs={2}>
+    <Col s={2}>
         <Select placeholder="Select a Breed" options={BREEDS} />
     </Col>
     );
@@ -16,7 +16,7 @@ export const SelectSubBreed = () => {
     const SUBBREEDS = [{id: 1, description: "Alemán", id_breed: 1}, {id: 2, description: "Francés", id_breed: 2}];
     
     return (
-    <Col xs={2}>
+    <Col s={2}>
         <Select placeholder="Select a Sub breed" options={SUBBREEDS} />
     </Col>
   );

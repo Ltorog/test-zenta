@@ -13,66 +13,109 @@ import { SubBreed } from "../interfaces/sub_breed";
 import { PageLink } from './page_link';
 import { getPaginationItems } from "../lib/pagination";
 import { Select } from './select';
+import { IPagination } from '../interfaces/pagination';
 
 
 export const TableData = () => {
 	const columns: Array<object> = getColumns();
 	const [dogs, setDogs ] = useState<[] | Dog[]>([]);
-	const [pagination, setPagination] = useState<[] | any>([]);
+	const [pagination, setPagination] = useState<{page: 1, total_pages: 1} | IPagination>({page: 1, total_pages: 1});
 	const [breeds, setBreeds] = useState<[] | Breed[]>([]);
+	const [subBreeds, setSubBreeds] = useState<[] | SubBreed[]>([]);
+	const [subBreedsToSelect, setSubBreedsToSelect] = useState<[] | SubBreed[]>([]);
+
+	const [dogName, setDogName] = useState<'' | string>('');
+	
+	let selectedBreed = 0;
+
+	const [formData, setFormData] = useState({
+		description: '',
+		url_src: '',
+		id_sub_breed: 0,
+	});
 
 	useEffect(() => {
 		(async () => {
-			const allDataDogsAndPagination = await getAllDogsWithPagination();
-			setDogs(allDataDogsAndPagination.data);
-			setPagination(allDataDogsAndPagination.pagination)
+			await getAllDogs();
 		
 			const allBreeds = await getAllBreeds()
 			setBreeds(allBreeds.data)
+			
+			const allSubBreeds = await getAllSubBreeds(allBreeds.data[0].id);
+			console.log("allSubBreeds", allSubBreeds.data);
+			setSubBreeds(allSubBreeds.data);
 		})();
 	  }, []);
 
-	console.log(dogs);
-	console.log(pagination);
-	console.log("breeds", {breeds})
+	const getAllDogs = async () => {
+		const allDataDogsAndPagination = await getAllDogsWithPagination();
+		setDogs(allDataDogsAndPagination.data);
+		setPagination(allDataDogsAndPagination.pagination);
+	}
+
+	const alertDeleteDog = async (dog: Dog) => {
+		if (window.confirm('Are you sure you wish to delete this item?')) {
+			await deleteDog(dog.id);
+		}
+	}
+
 
 	const [show, setShow] = useState(false);
 
 	const handleClose = () => setShow(false);
 	const handleShow = () => setShow(true);
-	
 
 	const pageNums = getPaginationItems(pagination.page, pagination.total_pages, 5);
 	return (
 		<>
 			<div className="container d-flex justify-content-left my-5">
-				<Button onClick={handleShow} type="button" className="btn btn-primary">Create Dog</Button>
+				<Button onClick={handleShow} type="button" className="btn btn-primary">+ Create Dog</Button>
 			</div>
 			<Modal show={show} onHide={handleClose}>
-				<Modal.Header closeButton>
-				<	Modal.Title>Create Dog</Modal.Title>
-				</Modal.Header>
-				<Modal.Body>
-					<Row>
-						<div className="form-outline" data-mdb-input-init>
-							<input placeholder= "Insert dog name" type="searchDog" id="createDogForm" className="form-control" />
-						</div>
-					</Row>
-					<Row></Row>
-					<Row>
-						<div className="form-outline" data-mdb-input-init>
-							<Select options={breeds} />
-						</div>
-					</Row>
-				</Modal.Body>
-				<Modal.Footer>
-				<Button variant="secondary" onClick={handleClose}>
-					Close
-				</Button>
-				<Button variant="primary" onClick={handleClose}>
-					Save Changes
-				</Button>
-				</Modal.Footer>
+				<form>
+					<Modal.Header closeButton>
+						<Modal.Title>Create Dog</Modal.Title>
+					</Modal.Header>
+					<Modal.Body>
+						<form onSubmit={(e) => { 
+							e.preventDefault();
+							setDogName('')
+						}}>
+
+						</form>
+						<Row>
+							<div className="form-outline" data-mdb-input-init>
+								<span>Inserte nombre de perro</span><input placeholder= "Insert dog name" type="searchDog" id="nameDog" className="form-control" />
+							</div>
+						</Row>
+						<Row>
+							<div className="form-outline" data-mdb-input-init>
+								<span>Inserte url de imagen de perro</span><input placeholder= "Insert url link dog" type="searchDog" id="dogImgSrc" className="form-control" />
+							</div>
+						</Row>
+						<Row>
+							<div className="form-outline" data-mdb-input-init>
+								<span>Seleccione raza</span><Select options={breeds} />
+							</div>
+						</Row>
+						<Row>
+							<div className="form-outline" data-mdb-input-init>
+								<span>Seleccione sub raza</span><Select onChange={selectedBreed} options={subBreeds} />
+							</div>
+						</Row>
+					</Modal.Body>
+					<Modal.Footer>
+					<Button variant="secondary" onClick={handleClose}>
+						Close
+					</Button>
+					<Button variant="primary" onClick={async () => {
+											await createDog();
+											await getAllDogs();
+										}}>
+						Create Dog
+					</Button>
+					</Modal.Footer>
+				</form>
 			</Modal>
 			<div className="container d-flex justify-content-center my-5">
 				<Table striped bordered hover>
@@ -86,7 +129,7 @@ export const TableData = () => {
 						</tr>
 					</thead>
 					<tbody>
-						{dogs.map((dog: { id: any; description: any; url_src: any; sub_breed: { breed: { description: any; }; description: any; }; }) => {
+						{dogs.map((dog: Dog) => {
 							return (
 								<tr>
 									<td>{dog.id}</td>
@@ -95,34 +138,21 @@ export const TableData = () => {
 									<td>{dog.sub_breed.breed.description}</td>
 									<td>{dog.sub_breed.description}</td>
 									<td>
-										<Button type="button" className="btn btn-danger" onClick={() => {
-											if (window.confirm('Are you sure you wish to delete this item?')) {
-												deleteDog(dog.id)
-											}
+										<Button type="button" className="btn btn-danger" onClick={async () => {
+											await alertDeleteDog(dog);
+											await getAllDogs();
 										}}><FaTrash /> Eliminar</Button>
 									</td>
 								</tr>
 							)
 						})}
 					</tbody>
-				</Table>
-				
-			</div>
-			<div className="container d-flex justify-content-center my-5">
-				{pageNums.map((pageNum, idx) => (
-					<PageLink
-						className={idx} 
-						currentPage={pagination.page} 
-						lastPage={pagination.total_pages} 
-						setCurrentPage={pageNum} 
-						active={pagination.page == pageNum} 
-						children={pageNum}
-					/>
-				))}
+				</Table>		
 			</div>
 		</>
     );
 }
+
 
 const getColumns = () => {
 	return [
@@ -165,6 +195,12 @@ async function getAllDogsWithPagination(): Promise<any> {
 	return response.data;
 }
 
+async function createDog(): Promise<any> {
+	const url = "http://localhost:3000/api/dogs";
+	const response = axios.post<Dog>(url);
+	return response;
+}
+
 
 function deleteDog(id: number): any {
 	const url = `http://localhost:3000/api/dogs/${id}`;
@@ -175,14 +211,14 @@ function deleteDog(id: number): any {
 
 async function getAllBreeds(): Promise<any> {
 	const url = "http://localhost:3000/api/breeds";
-	const response = await axios.get<Dog[]>(url);
+	const response = await axios.get<Breed[]>(url);
 	return response;
 }
 
 
 async function getAllSubBreeds(id_breed: number): Promise<any> {
-	const url = `http://localhost:3000/api/sub_breeds?id_breed=${id_breed}`;
-	const response = await axios.get<Dog[]>(url);
+	const url = `http://localhost:3000/api/sub-breeds?id_breed=${id_breed}`;
+	const response = await axios.get<SubBreed[]>(url);
 	return response;
 }
 

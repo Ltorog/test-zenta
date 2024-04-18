@@ -3,6 +3,6 @@ import { SubBreed } from './sub_breed';
 export interface Dog {
     id: number;
     description: string;
-    imageSrc: string;
-    subBreed: SubBreed;
+    url_src: string;
+    sub_breed: SubBreed;
   }

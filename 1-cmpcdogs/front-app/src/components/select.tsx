@@ -1,24 +1,24 @@
 import React, { JSXElementConstructor, ReactElement, ReactNode, ReactPortal, useState } from "react";
 import { className } from 'react-bootstrap';
+import { Breed } from "../interfaces/breed";
+import { SubBreed } from "../interfaces/sub_breed";
 
 
 interface SelectProps {
-    options: Object;
-
+    options: Breed | SubBreed;
 }
 
-export const Select: React.FC<SelectProps> = ({options}) => {
-    console.log("OPTIONS IN SELECT", options);
+export const Select: React.FC<SelectProps> = ({options}): any=> {
     return (
         <select className="form-select" aria-label="Default select example">
             {
-                options.map((objectOption: { id: string | number | readonly string[] | undefined; description: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; }) => {
-                    {console.log("objectOption", objectOption.id)}
-                    <option value={objectOption.id}>{objectOption.description}</option>
+                options.map((objectOption: { id: number, description: string }) => {
+                    return (
+                        <option value={objectOption.id}>{objectOption.description}</option>
+                    )
                 })
             }
             
         </select>
     )
-
 };
